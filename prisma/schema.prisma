@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+model Section {
+  id           String               @id @default(cuid())
+  key          String               @unique
+  title        String
+  content      String               @db.Text
+  updatedAt    DateTime             @updatedAt
+  photos       Photo[]
+  translations SectionTranslation[]
+}
+
+model SectionTranslation {
+  id        String  @id @default(cuid())
+  locale    String
+  title     String
+  content   String  @db.Text
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, locale])
+}
+
+enum ProjectStatus {
+  ACTUAL
+  FUTURO
+}
+
+model Project {
+  id           String               @id @default(cuid())
+  title        String
+  description  String               @db.Text
+  status       ProjectStatus
+  imageUrl     String?
+  createdAt    DateTime             @default(now())
+  translations ProjectTranslation[]
+}
+
+model ProjectTranslation {
+  id          String  @id @default(cuid())
+  locale      String
+  title       String
+  description String  @db.Text
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, locale])
+}
+
+model Photo {
+  id        String  @id @default(cuid())
+  url       String
+  caption   String?
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+}
