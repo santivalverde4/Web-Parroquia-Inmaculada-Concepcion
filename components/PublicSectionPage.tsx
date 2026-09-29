@@ -251,7 +251,7 @@ async function ProyectosSection({ locale }: { locale: Locale }) {
                   className={`self-start rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
                     project.status === "ACTUAL"
                       ? "bg-brand-50 text-brand-700"
-                      : "bg-gold-100 text-gold-600"
+                      : "bg-gold-100 text-gold-700"
                   }`}
                 >
                   {project.status === "ACTUAL" ? t.current : t.future}

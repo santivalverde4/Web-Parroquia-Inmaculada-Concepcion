@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -43,20 +44,31 @@ export function Navbar({ locale }: { locale: Locale }) {
   const isActive = (path: string) => pathname === localizedPath(locale, path);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-white/85 backdrop-blur-md">
-      <Container className="flex items-center justify-between gap-4 py-3.5">
+    <header className="nav-shadow sticky top-0 z-50 border-b border-line bg-white/85 backdrop-blur-md">
+      <Container className="flex h-18 items-center justify-between gap-4">
         <Link
           href={localizedPath(locale)}
-          className="flex shrink-0 flex-col leading-none"
+          className="flex shrink-0 items-center gap-3"
           aria-label={t.siteName}
         >
-          <span className="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-brand-600">
-            {locale === "es" ? "Parroquia" : "Parish"}
-          </span>
-          <span className="mt-1 font-display text-lg font-bold tracking-tight text-ink sm:text-xl">
-            {locale === "es"
-              ? "Inmaculada Concepción"
-              : "Immaculate Conception"}
+          {/* alt vacio: el enlace ya se anuncia con el nombre de la parroquia. */}
+          <Image
+            src="/images/logo-parroquia.png"
+            alt=""
+            width={44}
+            height={44}
+            priority
+            className="h-11 w-11"
+          />
+          <span className="flex flex-col leading-none">
+            <span className="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-brand-700">
+              {locale === "es" ? "Parroquia" : "Parish"}
+            </span>
+            <span className="mt-1 font-display text-lg font-bold tracking-tight text-ink sm:text-xl">
+              {locale === "es"
+                ? "Inmaculada Concepción"
+                : "Immaculate Conception"}
+            </span>
           </span>
         </Link>
 
@@ -95,7 +107,9 @@ export function Navbar({ locale }: { locale: Locale }) {
 
         {/* Navegación móvil */}
         <div className="flex items-center gap-2 xl:hidden">
-          <LanguageSwitch locale={locale} />
+          <div className="hidden sm:block">
+            <LanguageSwitch locale={locale} />
+          </div>
           <button
             type="button"
             onClick={toggleMenu}
@@ -147,6 +161,12 @@ export function Navbar({ locale }: { locale: Locale }) {
           className="border-t border-line bg-white xl:hidden"
         >
           <Container className="flex flex-col gap-1 py-4">
+            <div className="mb-2 flex items-center justify-between px-4 sm:hidden">
+              <span className="text-sm font-medium text-muted">
+                {locale === "es" ? "Idioma" : "Language"}
+              </span>
+              <LanguageSwitch locale={locale} />
+            </div>
             {items.map(([path, label]) => (
               <Link
                 key={path}

@@ -3,42 +3,50 @@ import type { Config } from "tailwindcss";
 /**
  * Design tokens de la parroquia.
  *
- * La paleta sale de la identidad real del templo: el azul mariano de la
- * cupula iluminada y el dorado de la cruz. El fondo es blanco y el color
- * se usa en dosis pequenas (botones, etiquetas, superficies suaves).
+ * La paleta sale del logo: dorado #FCB707, celeste claro #A5DEF9,
+ * celeste #46BCEB y azul #2977B5, sobre blanco y negro. Los tonos
+ * intermedios de cada escala se derivaron de esos colores base.
  *
- * Regla de uso: en los componentes se usan SIEMPRE estos nombres
- * (bg-brand-600, text-ink, border-line...) y nunca un hexadecimal suelto.
- * Asi cambiar la marca entera es editar solo este archivo.
+ * Reglas de contraste (WCAG AA, minimo 4.5 para texto):
+ * - brand-600 (#2977B5) con texto blanco: 4.77. Botones y enlaces.
+ * - gold-400 (#FCB707) SOLO con texto negro (10.9). Con blanco da 1.76.
+ * - brand-400 y brand-200 (celestes): fondos y decoracion, nunca texto
+ *   sobre blanco. Sobre brand-900 si se leen bien (8.8).
+ *
+ * En los componentes se usan SIEMPRE estos nombres (bg-brand-600,
+ * text-ink...), nunca un hexadecimal suelto: cambiar la marca entera es
+ * editar solo este archivo.
  */
 const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Azul mariano: color principal de la marca.
         brand: {
-          50: "#f1f4fd",
-          100: "#e2e8fa",
-          200: "#c6d2f4",
-          300: "#9db1ea",
-          400: "#6d87dc",
-          500: "#4762c9",
-          600: "#2f47ac",
-          700: "#26388c",
-          800: "#1e2d6f",
-          900: "#172352",
+          50: "#eaf6fd",
+          100: "#d3eefc",
+          200: "#a5def9", // logo
+          300: "#74cdf2",
+          400: "#46bceb", // logo
+          500: "#3698d2",
+          600: "#2977b5", // logo
+          700: "#1f5f93",
+          800: "#184a73",
+          900: "#113454",
+          950: "#0a2136",
         },
-        // Dorado de la cruz: solo para detalles y acentos pequenos.
         gold: {
-          100: "#f7efd9",
-          400: "#d6b45a",
-          500: "#c39a34",
-          600: "#a37d24",
+          100: "#fff4cc",
+          200: "#fee48a",
+          300: "#fdd045",
+          400: "#fcb707", // logo
+          500: "#dc9f00",
+          600: "#a87900",
+          700: "#7a5a00",
         },
-        ink: "#141a2e", // texto principal
-        muted: "#5c6478", // texto secundario
-        line: "#e4e7f0", // bordes
-        surface: "#f5f6fa", // paneles y fondos suaves
+        ink: "#0b0f14", // negro del logo, un punto suavizado
+        muted: "#57606b",
+        line: "#e3e9ef",
+        surface: "#f4f8fb",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],

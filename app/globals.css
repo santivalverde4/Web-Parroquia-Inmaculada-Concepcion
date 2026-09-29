@@ -58,3 +58,237 @@ select {
 summary::-webkit-details-marker {
   display: none;
 }
+
+/* ======================================================================
+   Animaciones ligadas al scroll
+   ----------------------------------------------------------------------
+   Usan "scroll-driven animations" de CSS: el avance de la animacion lo
+   marca el scroll, no el tiempo. No hace falta JavaScript ni librerias, y
+   el navegador las ejecuta fuera del hilo principal, asi que no traban la
+   pagina.
+
+   Todo va dentro de @supports: un navegador que no las soporta muestra la
+   pagina normal, sin efectos y sin nada roto.
+   ====================================================================== */
+
+/* Difuminado progresivo en los bordes de la pantalla --------------------
+   Tres capas apiladas con desenfoque creciente. Cada mascara deja pasar
+   menos a medida que se aleja del borde, asi el desenfoque aumenta de a
+   poco en vez de cortar en una linea. */
+.edge-blur {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .edge-blur {
+    display: block;
+    position: fixed;
+    inset-inline: 0;
+    height: 3.5rem;
+    z-index: 40;
+    pointer-events: none;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root);
+  }
+
+  .edge-blur > div {
+    position: absolute;
+    inset: 0;
+  }
+
+  .edge-blur > div:nth-child(1) {
+    backdrop-filter: blur(1px);
+  }
+  .edge-blur > div:nth-child(2) {
+    backdrop-filter: blur(3px);
+  }
+  .edge-blur > div:nth-child(3) {
+    backdrop-filter: blur(6px);
+  }
+
+  /* Franja de abajo: mas fuerte pegada al borde inferior. */
+  .edge-blur--bottom {
+    bottom: 0;
+    /* Se apaga al llegar al final para que el pie de pagina quede nitido. */
+    animation-name: edge-blur-hide;
+    animation-range: calc(100% - 120px) 100%;
+  }
+  .edge-blur--bottom > div:nth-child(1) {
+    mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+  }
+  .edge-blur--bottom > div:nth-child(2) {
+    mask-image: linear-gradient(to top, #000 0%, transparent 65%);
+  }
+  .edge-blur--bottom > div:nth-child(3) {
+    mask-image: linear-gradient(to top, #000 0%, transparent 35%);
+  }
+
+  /* Franja de arriba: justo debajo de la barra de navegacion (h-18). */
+  .edge-blur--top {
+    top: 4.5rem;
+    height: 2.5rem;
+    /* Aparece recien al empezar a bajar: en reposo no toca la portada. */
+    animation-name: edge-blur-show;
+    animation-range: 0 120px;
+  }
+  .edge-blur--top > div:nth-child(1) {
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  }
+  .edge-blur--top > div:nth-child(2) {
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 65%);
+  }
+  .edge-blur--top > div:nth-child(3) {
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 35%);
+  }
+}
+
+@keyframes edge-blur-show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes edge-blur-hide {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Aparicion al entrar en pantalla --------------------------------------
+   Cada bloque con la clase .reveal sube un poco y pasa de desenfocado a
+   nitido mientras entra por abajo. El rango "entry 0% entry 40%" hace que
+   quede nitido apenas asoma, sin esperar a que entre completo: importa en
+   celular, donde un bloque puede ser mas alto que la pantalla.
+
+   Solo corre si la persona no pidio reducir el movimiento en su sistema. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation-name: reveal;
+      animation-timing-function: ease-out;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+/* ======================================================================
+   Portada
+   ====================================================================== */
+
+/* Entrada del titular al cargar la pagina: cada linea aparece un poco
+   despues de la anterior (animation-delay en cada elemento). */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-enter > * {
+    animation: hero-enter 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .hero-enter > :nth-child(1) {
+    animation-delay: 0.05s;
+  }
+  .hero-enter > :nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .hero-enter > :nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .hero-enter > :nth-child(4) {
+    animation-delay: 0.45s;
+  }
+  .hero-enter > :nth-child(5) {
+    animation-delay: 0.6s;
+  }
+}
+
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+/* Parallax al bajar: la foto se acerca y el texto sube y se desvanece
+   mientras la portada sale de la pantalla. La linea de tiempo --hero la
+   declara el marco de la portada y la leen sus hijos. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-frame {
+      view-timeline-name: --hero;
+    }
+    .hero-photo {
+      animation-name: hero-photo;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 100%;
+    }
+    .hero-copy {
+      animation-name: hero-copy;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 70%;
+    }
+  }
+}
+
+@keyframes hero-photo {
+  to {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes hero-copy {
+  to {
+    opacity: 0;
+    transform: translateY(-3rem);
+  }
+}
+
+/* ======================================================================
+   Barra de navegacion: gana sombra al empezar a bajar.
+   ====================================================================== */
+@supports (animation-timeline: scroll()) {
+  .nav-shadow {
+    animation-name: nav-shadow;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root);
+    animation-range: 0 80px;
+  }
+}
+
+@keyframes nav-shadow {
+  from {
+    box-shadow: 0 0 0 rgb(11 15 20 / 0);
+  }
+  to {
+    box-shadow: 0 8px 24px -16px rgb(11 15 20 / 0.25);
+  }
+}
