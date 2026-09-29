@@ -156,3 +156,16 @@ export function EmptyState({ text }: { text: string }) {
     </div>
   );
 }
+
+/** Enlace para regresar a la portada, al pie de cada pagina interna. */
+export function BackLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+    >
+      <span aria-hidden="true">&larr;</span>
+      {label}
+    </Link>
+  );
+}

@@ -53,7 +53,7 @@ export function Navbar({ locale }: { locale: Locale }) {
           <span className="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-brand-600">
             {locale === "es" ? "Parroquia" : "Parish"}
           </span>
-          <span className="mt-1 font-display text-lg font-semibold tracking-tight text-ink sm:text-xl">
+          <span className="mt-1 font-display text-lg font-bold tracking-tight text-ink sm:text-xl">
             {locale === "es"
               ? "Inmaculada Concepción"
               : "Immaculate Conception"}

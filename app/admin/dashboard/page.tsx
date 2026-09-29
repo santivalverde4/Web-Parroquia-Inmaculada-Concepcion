@@ -43,7 +43,7 @@ export default async function DashboardPage({
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
               Parroquia de la Inmaculada Concepción
             </p>
-            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
               Administración
             </h1>
             <p className="mt-2 text-sm text-muted">
@@ -75,7 +75,7 @@ export default async function DashboardPage({
         )}
 
         <section className="mt-12">
-          <h2 className="font-display text-2xl font-semibold">
+          <h2 className="font-display text-2xl font-bold">
             Contenido de la parroquia
           </h2>
           <p className="mt-2 leading-7 text-muted">
@@ -115,7 +115,7 @@ export default async function DashboardPage({
         </section>
 
         <section className="mt-14">
-          <h2 className="font-display text-2xl font-semibold">
+          <h2 className="font-display text-2xl font-bold">
             Galería de historia
           </h2>
           <p className="mt-2 leading-7 text-muted">
@@ -170,7 +170,7 @@ export default async function DashboardPage({
         </section>
 
         <section className="mt-14 pb-10">
-          <h2 className="font-display text-2xl font-semibold">Proyectos</h2>
+          <h2 className="font-display text-2xl font-bold">Proyectos</h2>
           <p className="mt-2 leading-7 text-muted">
             Publique proyectos en marcha o futuros. La traducción al inglés es
             opcional.
@@ -274,7 +274,7 @@ function SectionEditor({
       action={saveSectionAction}
       className="rounded-panel border border-line bg-white p-6 shadow-card"
     >
-      <h3 className="mb-5 font-display text-xl font-semibold">{label}</h3>
+      <h3 className="mb-5 font-display text-xl font-bold">{label}</h3>
       <input type="hidden" name="key" value={sectionKey} />
       <input type="hidden" name="locale" value={locale} />
       <div className="space-y-4">
@@ -315,7 +315,7 @@ function ProjectEditor({
       className="overflow-hidden rounded-panel border border-line bg-white shadow-card"
       open={!id}
     >
-      <summary className="cursor-pointer p-6 font-display text-xl font-semibold">
+      <summary className="cursor-pointer p-6 font-display text-xl font-bold">
         {label}
       </summary>
 

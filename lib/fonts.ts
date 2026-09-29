@@ -1,4 +1,4 @@
-import { Plus_Jakarta_Sans, Fraunces } from "next/font/google";
+import { Plus_Jakarta_Sans, Urbanist } from "next/font/google";
 
 /**
  * Tipografia del sitio.
@@ -7,9 +7,10 @@ import { Plus_Jakarta_Sans, Fraunces } from "next/font/google";
  * mismo dominio: no hay peticion a Google en tiempo de ejecucion y no hay
  * salto visual al cargar la pagina.
  *
- * - sans (Plus Jakarta Sans): interfaz y texto corrido. Geometrica y amable.
- * - display (Fraunces): titulares. Aporta la calidez que pide una parroquia
- *   sin caer en lo solemne.
+ * - sans (Plus Jakarta Sans): interfaz y texto corrido. Tiene una altura de
+ *   x generosa, asi que se lee bien en tamanos pequenos y en celular.
+ * - display (Urbanist): titulares. Geometrica y de trazos rectos, en la
+ *   linea de la referencia visual. Solo se usa en tamanos grandes.
  */
 export const fontSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -17,11 +18,10 @@ export const fontSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
 });
 
-export const fontDisplay = Fraunces({
+export const fontDisplay = Urbanist({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-display",
-  axes: ["SOFT", "WONK", "opsz"],
 });
 
 /** Clases que se aplican al <html> de cada layout. */

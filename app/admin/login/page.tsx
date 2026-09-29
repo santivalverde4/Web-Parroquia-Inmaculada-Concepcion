@@ -25,7 +25,7 @@ export default async function LoginPage({
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
             Parroquia de la Inmaculada Concepción
           </p>
-          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink">
+          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink">
             Administración
           </h1>
           <p className="mt-3 leading-7 text-muted">

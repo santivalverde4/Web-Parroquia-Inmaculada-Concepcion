@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { PublicShell } from "@/components/PublicShell";
 import { SectionLayout } from "@/components/SectionLayout";
 import { ButtonLink, EmptyState, Eyebrow, ImageSlot } from "@/components/ui";
-import { getMessages, localizedPath, type Locale } from "@/lib/i18n";
+import { getMessages, type Locale } from "@/lib/i18n";
 import { getSection, getProjects } from "@/lib/services/content";
 import { getYouTubeVideos } from "@/lib/services/youtube";
 import { getFacebookPosts } from "@/lib/services/facebook";
@@ -133,7 +132,7 @@ async function VideosSection({ locale }: { locale: Locale }) {
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
               <div className="flex flex-1 flex-col p-6">
-                <h2 className="font-display text-lg font-semibold leading-snug text-ink">
+                <h2 className="font-display text-lg font-bold leading-snug text-ink">
                   {video.title}
                 </h2>
                 <p className="mt-2 line-clamp-3 text-sm leading-7 text-muted">
@@ -257,7 +256,7 @@ async function ProyectosSection({ locale }: { locale: Locale }) {
                 >
                   {project.status === "ACTUAL" ? t.current : t.future}
                 </span>
-                <h2 className="mt-4 font-display text-2xl font-semibold text-ink">
+                <h2 className="mt-4 font-display text-2xl font-bold text-ink">
                   {project.title}
                 </h2>
                 <p className="mt-3 whitespace-pre-wrap leading-8 text-muted">
@@ -296,7 +295,7 @@ async function MapaSection({ locale }: { locale: Locale }) {
           <Eyebrow>
             {locale === "es" ? "Planee su visita" : "Plan your visit"}
           </Eyebrow>
-          <h2 className="mt-3 font-display text-2xl font-semibold text-ink sm:text-3xl">
+          <h2 className="mt-3 font-display text-2xl font-bold text-ink sm:text-3xl">
             {t.siteName}
           </h2>
           <p className="mt-4 leading-8 text-muted">
@@ -313,14 +312,6 @@ async function MapaSection({ locale }: { locale: Locale }) {
           )}
         </div>
       </div>
-
-      <Link
-        href={localizedPath(locale)}
-        className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-700"
-      >
-        <span aria-hidden="true">&larr;</span>
-        {locale === "es" ? "Volver al inicio" : "Back to home"}
-      </Link>
     </SectionLayout>
   );
 }

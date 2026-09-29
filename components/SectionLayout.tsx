@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import type { Locale } from "@/lib/i18n";
-import { Container, Eyebrow } from "@/components/ui";
+import { localizedPath, type Locale } from "@/lib/i18n";
+import { BackLink, Container, Eyebrow } from "@/components/ui";
 
 /** Encabezado y contenedor comunes a todas las paginas internas. */
 export function SectionLayout({
@@ -23,7 +23,7 @@ export function SectionLayout({
               ? "Inmaculada Concepción"
               : "Immaculate Conception"}
           </Eyebrow>
-          <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight text-ink sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.1] tracking-tight text-ink sm:text-5xl lg:text-6xl">
             {title}
           </h1>
           {intro && (
@@ -34,7 +34,15 @@ export function SectionLayout({
         </div>
       </Container>
 
-      <Container className="py-12 lg:py-16">{children}</Container>
+      <Container className="py-12 lg:py-16">
+        {children}
+        <div className="mt-10">
+          <BackLink
+            href={localizedPath(locale)}
+            label={locale === "es" ? "Volver al inicio" : "Back to home"}
+          />
+        </div>
+      </Container>
     </main>
   );
 }
