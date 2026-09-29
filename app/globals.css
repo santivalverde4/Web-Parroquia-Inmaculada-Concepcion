@@ -1,5 +1,60 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
-body { background: #faf9f6; color: #262626; }
-button, input, textarea { font: inherit; }
+/*
+  Estilos base del sitio. Todo lo demas se resuelve con utilidades de
+  Tailwind dentro de cada componente.
+*/
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #ffffff;
+  color: #141a2e;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Los controles de formulario no heredan la fuente por defecto. */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Anillo de foco visible y consistente en todo el sitio, clave para
+   navegar con teclado. */
+:where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 2px solid #2f47ac;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Respeta a quien pide menos animacion en su sistema operativo. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Quita la flecha nativa del <details> que usa el menu movil. */
+summary::-webkit-details-marker {
+  display: none;
+}
