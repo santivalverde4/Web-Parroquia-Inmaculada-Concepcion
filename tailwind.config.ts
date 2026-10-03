@@ -57,8 +57,10 @@ const config: Config = {
         panel: "1.75rem",
       },
       boxShadow: {
-        card: "0 1px 2px rgb(20 26 46 / 0.04), 0 8px 24px -12px rgb(20 26 46 / 0.12)",
-        lift: "0 2px 4px rgb(20 26 46 / 0.04), 0 18px 40px -16px rgb(20 26 46 / 0.22)",
+        // Sombras tenidas con brand-900 (#113454) en vez de gris neutro:
+        // se funden con la paleta en lugar de ensuciar el fondo.
+        card: "0 1px 2px rgb(17 52 84 / 0.05), 0 8px 24px -12px rgb(17 52 84 / 0.16)",
+        lift: "0 2px 4px rgb(17 52 84 / 0.05), 0 18px 40px -16px rgb(17 52 84 / 0.28)",
       },
       maxWidth: {
         content: "76rem",

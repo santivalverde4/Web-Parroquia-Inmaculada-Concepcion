@@ -11,7 +11,7 @@ export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={fontVariables}>
+    <html lang="es" className={fontVariables} data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

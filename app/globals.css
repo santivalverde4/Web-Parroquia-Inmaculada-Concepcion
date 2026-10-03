@@ -272,6 +272,401 @@ summary::-webkit-details-marker {
 }
 
 /* ======================================================================
+   Apertura de las paginas internas
+   ----------------------------------------------------------------------
+   Al abrir Historia, Videos, Noticias, Proyectos o Ubicacion, el
+   encabezado se "despliega" en tres tiempos:
+
+   1. El panel se abre desde el centro: arranca recortado y transparente
+      y se expande hasta su tamano real.
+   2. Mientras se abre, la franja del logo se dibuja barra por barra, de
+      izquierda a derecha, y el texto sube y se enfoca linea por linea
+      (la misma entrada .hero-enter de la portada).
+   3. Al final aparece el contenido de la pagina.
+
+   Solo usa transform, opacity y clip-path, que el navegador anima sin
+   recalcular el layout, asi que va fluida tambien en celular. Si la
+   persona pidio reducir el movimiento, la pagina aparece directamente.
+   ====================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  .section-open {
+    animation: section-open 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .stripe-draw > span {
+    transform-origin: left center;
+    animation: stripe-draw 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .stripe-draw > span:nth-child(1) {
+    animation-delay: 0.3s;
+  }
+  .stripe-draw > span:nth-child(2) {
+    animation-delay: 0.4s;
+  }
+  .stripe-draw > span:nth-child(3) {
+    animation-delay: 0.5s;
+  }
+  .stripe-draw > span:nth-child(4) {
+    animation-delay: 0.6s;
+  }
+
+  /* Sin desenfoque a proposito: el contenido puede ser un bloque grande y
+     desenfocar toda esa area de golpe le cuesta al celular. */
+  .content-enter {
+    animation: content-enter 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.55s both;
+  }
+}
+
+/* El radio del recorte (1.75rem) es el mismo de rounded-panel: asi las
+   esquinas se ven redondeadas durante toda la apertura. */
+@keyframes section-open {
+  from {
+    opacity: 0;
+    clip-path: inset(8% 5% round 1.75rem);
+    transform: translateY(1rem);
+  }
+  /* Termina en un recorte NEGATIVO (mas grande que el panel): con fill
+     "both" el ultimo cuadro se queda aplicado, y un recorte justo al borde
+     cortaria la sombra del panel. */
+  to {
+    opacity: 1;
+    clip-path: inset(-4rem round 1.75rem);
+    transform: none;
+  }
+}
+
+@keyframes stripe-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ======================================================================
+   Luz de vitral
+   ----------------------------------------------------------------------
+   Capa fija detras de todo el contenido (components/StainedLight.tsx).
+   Cuatro manchas de luz con los colores del logo, como el color que
+   proyectan los vitrales sobre las paredes del templo, y dos haces
+   diagonales calidos que bajan desde arriba a la derecha.
+
+   Son solo degradados: no usa filter: blur ni imagenes, asi que no pesa
+   nada y se ve igual de nitida en cualquier pantalla. La capa es mas
+   grande que la ventana para poder desplazarse con el scroll sin que se
+   vean sus bordes.
+   ====================================================================== */
+.stained-light {
+  position: fixed;
+  inset: -15vh -10vw;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      42vmax 32vmax at 10% 12%,
+      rgb(252 183 7 / 0.3),
+      transparent 70%
+    ),
+    radial-gradient(
+      40vmax 30vmax at 92% 24%,
+      rgb(70 188 235 / 0.32),
+      transparent 70%
+    ),
+    radial-gradient(
+      44vmax 34vmax at 18% 80%,
+      rgb(41 119 181 / 0.22),
+      transparent 70%
+    ),
+    radial-gradient(
+      36vmax 28vmax at 86% 86%,
+      rgb(165 222 249 / 0.45),
+      transparent 70%
+    );
+}
+
+/* Haces de luz: dos franjas diagonales que se desvanecen hacia abajo. */
+.stained-light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 34%,
+    rgb(252 208 69 / 0.22) 40%,
+    transparent 46%,
+    transparent 54%,
+    rgb(116 205 242 / 0.22) 60%,
+    transparent 66%
+  );
+  mask-image: radial-gradient(75% 65% at 78% 0%, #000, transparent 80%);
+}
+
+/* La luz se desplaza despacio mientras se baja por la pagina, como si el
+   sol cambiara de angulo. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .stained-light {
+      animation: stained-drift linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
+@keyframes stained-drift {
+  to {
+    transform: translate3d(-3vw, -12vh, 0);
+  }
+}
+
+/* ======================================================================
+   Opciones de lectura (components/ReadingOptions.tsx)
+   ----------------------------------------------------------------------
+   El script de lib/readingPreferences.ts pone data-text y data-contrast
+   en <html>. Estas reglas no estan dentro de ninguna @layer, asi que le
+   ganan a las utilidades de Tailwind sin necesidad de !important.
+   ====================================================================== */
+
+/* Tamano del texto -----------------------------------------------------
+   Todo el sitio esta medido en rem, asi que cambiar el tamano base escala
+   textos, botones y espacios en proporcion, como un zoom bien hecho. Se
+   usan porcentajes para respetar el tamano que la persona ya tenga
+   configurado en su navegador. */
+html[data-text="lg"] {
+  font-size: 112.5%;
+}
+html[data-text="xl"] {
+  font-size: 125%;
+}
+
+/* Con "Muy grande" la barra completa no cabe entre 1280px y 1536px: en ese
+   rango se usa el menu compacto (hamburguesa), igual que en tablet. Las
+   media queries en rem se miden con el tamano por defecto del navegador,
+   no con el de arriba, por eso 80rem y 96rem siguen siendo 1280 y 1536. */
+@media (min-width: 80rem) and (max-width: 95.98rem) {
+  html[data-text="xl"] .nav-desktop {
+    display: none;
+  }
+  html[data-text="xl"] .nav-compact {
+    display: flex;
+  }
+  html[data-text="xl"] .nav-compact-menu {
+    display: block;
+  }
+}
+
+/* Nombre junto al logo --------------------------------------------------
+   En celulares angostos la barra no alcanza para logo, nombre, "Aa" y
+   menu: ahi se oculta el nombre y queda solo el escudo. El corte depende
+   del tamano del texto, porque con letra mas grande el nombre ocupa mas:
+   normal necesita ~386px, Grande ~434px y Muy grande ~482px. */
+@media (max-width: 24.98rem) {
+  .brand-wordmark {
+    display: none;
+  }
+}
+@media (max-width: 27.98rem) {
+  html[data-text="lg"] .brand-wordmark {
+    display: none;
+  }
+}
+@media (max-width: 31.23rem) {
+  html[data-text="xl"] .brand-wordmark {
+    display: none;
+  }
+}
+
+/* Alto contraste --------------------------------------------------------
+   Oscurece los textos secundarios y los azules, marca los bordes y apaga
+   la luz de vitral para que el fondo quede limpio. Los valores cumplen
+   WCAG AAA (7:1) para texto sobre blanco. */
+html[data-contrast="high"] .stained-light {
+  display: none;
+}
+html[data-contrast="high"] .text-muted {
+  color: #2f3740; /* 11.6:1 sobre blanco */
+}
+html[data-contrast="high"] :is(.text-brand-600, .text-brand-700) {
+  color: #184a73; /* brand-800, 9.6:1 */
+}
+html[data-contrast="high"] .bg-brand-600 {
+  background-color: #184a73; /* brand-800: el texto blanco gana contraste */
+}
+html[data-contrast="high"] :is(.border-line, .border-white\/35) {
+  border-color: #7a8794;
+}
+html[data-contrast="high"] .bg-surface {
+  background-color: #e8eff5;
+}
+/* Contenedores solidos y con borde gris oscuro parejo, sin cristal. */
+html[data-contrast="high"] :is(.surface-panel, .surface-card) {
+  background-color: #ffffff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html[data-contrast="high"] .surface-inset {
+  background-color: #e8eff5;
+}
+html[data-contrast="high"] :is(.surface-panel, .surface-card, .surface-inset) {
+  border-color: #7a8794;
+}
+html[data-contrast="high"]
+  :is(.surface-panel, .surface-card, .surface-inset)::before {
+  background: #7a8794;
+}
+/* Fotografia de la portada: mas oscura para que el titular blanco se lea
+   sin importar que parte de la foto quede detras. */
+html[data-contrast="high"] .hero-frame .bg-brand-900\/55 {
+  background-color: rgb(17 52 84 / 0.78);
+}
+
+/* ======================================================================
+   Contenedores
+   ----------------------------------------------------------------------
+   Todo contenedor del sitio publico es de uno de estos tres tipos. Si un
+   bloque nuevo no encaja en ninguno, conviene revisar el diseno antes de
+   inventar un cuarto.
+
+   .surface-panel  Contenedor grande de una seccion (encabezados, el panel
+                   de informacion, el mapa...). Es de cristal: blanco
+                   translucido, asi que la luz de vitral del fondo se ve a
+                   traves de el.
+   .surface-card   Elemento que se repite en una grilla (videos, noticias,
+                   proyectos, accesos) o que flota (menu de lectura).
+                   Blanco solido, para que se lea perfecto sobre cualquier
+                   fondo. Con --interactive se eleva al pasar el cursor.
+   .surface-inset  Bloque secundario DENTRO de un panel. Tinte suave y sin
+                   sombra: se lee como hundido, no como otra capa encima.
+                   --strong lo destaca un poco (horarios de misa).
+
+   Reglas de anidado: un panel contiene cards o insets, nunca otro panel.
+   Radios: panel 1.75rem, card e inset 1.25rem.
+
+   Los tres comparten el "borde de luz": un filo de 1px que pasa del
+   dorado al celeste del logo, como la luz al tocar el canto de un vidrio.
+   Las sombras usan el azul oscuro de la marca (brand-900) y no gris, para
+   que se fundan con la paleta.
+
+   Van dentro de @layer components: asi una utilidad de Tailwind puesta en
+   el mismo elemento (por ejemplo shadow-lift) le gana a estos valores.
+   ====================================================================== */
+@layer components {
+  .surface-panel,
+  .surface-card,
+  .surface-inset {
+    position: relative;
+    /* Respaldo para navegadores sin mask-composite (ver @supports abajo). */
+    border: 1px solid #e3e9ef;
+  }
+
+  .surface-panel {
+    --light-edge: linear-gradient(
+      135deg,
+      rgb(252 183 7 / 0.5),
+      rgb(165 222 249 / 0.5) 45%,
+      rgb(70 188 235 / 0.55)
+    );
+    border-radius: 1.75rem;
+    background-color: rgb(255 255 255 / 0.62);
+    box-shadow:
+      0 1px 2px rgb(17 52 84 / 0.04),
+      0 24px 56px -28px rgb(17 52 84 / 0.28);
+  }
+
+  /* Desenfoque del cristal solo en equipos con mouse (computadoras). Lo
+     que hay detras hoy son degradados suaves, asi que el efecto lo da
+     sobre todo la translucidez; el desenfoque es un extra que en celular
+     costaria rendimiento al hacer scroll sin aportar casi nada visible. */
+  @media (hover: hover) and (pointer: fine) {
+    .surface-panel {
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+  }
+
+  .surface-card {
+    --light-edge: linear-gradient(
+      135deg,
+      rgb(252 183 7 / 0.45),
+      rgb(165 222 249 / 0.45) 45%,
+      rgb(70 188 235 / 0.5)
+    );
+    border-radius: 1.25rem;
+    background-color: #ffffff;
+    box-shadow:
+      0 1px 2px rgb(17 52 84 / 0.05),
+      0 10px 28px -14px rgb(17 52 84 / 0.22);
+  }
+
+  .surface-card--interactive {
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .surface-card--interactive:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 2px 4px rgb(17 52 84 / 0.05),
+      0 22px 44px -18px rgb(17 52 84 / 0.32);
+  }
+
+  .surface-inset {
+    --light-edge: linear-gradient(
+      135deg,
+      rgb(252 183 7 / 0.28),
+      rgb(70 188 235 / 0.28)
+    );
+    border-radius: 1.25rem;
+    background-color: rgb(244 248 251 / 0.75);
+  }
+  .surface-inset--strong {
+    background-color: rgb(234 246 253 / 0.95);
+  }
+
+  /* Borde de luz: un pseudo-elemento del tamano del contenedor pintado con
+     el degradado, al que una mascara le recorta todo menos 1px de filo.
+     Va encima del contenido (z-index 1) para no quedar tapado por una
+     foto, y no recibe clics. */
+  @supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+    .surface-panel,
+    .surface-card,
+    .surface-inset {
+      border: 0;
+    }
+    .surface-panel::before,
+    .surface-card::before,
+    .surface-inset::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      padding: 1px;
+      border-radius: inherit;
+      background: var(--light-edge);
+      pointer-events: none;
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask:
+        linear-gradient(#000 0 0) content-box exclude,
+        linear-gradient(#000 0 0);
+    }
+  }
+}
+
+/* ======================================================================
    Barra de navegacion: gana sombra al empezar a bajar.
    ====================================================================== */
 @supports (animation-timeline: scroll()) {
@@ -286,9 +681,9 @@ summary::-webkit-details-marker {
 
 @keyframes nav-shadow {
   from {
-    box-shadow: 0 0 0 rgb(11 15 20 / 0);
+    box-shadow: 0 0 0 rgb(17 52 84 / 0);
   }
   to {
-    box-shadow: 0 8px 24px -16px rgb(11 15 20 / 0.25);
+    box-shadow: 0 8px 24px -16px rgb(17 52 84 / 0.28);
   }
 }

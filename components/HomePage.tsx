@@ -118,7 +118,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
                 espacio sobrante (flex-1) y a la derecha las tres tarjetas se
                 reparten el alto en partes iguales (grid-rows-3). Por eso
                 las dos columnas empiezan y terminan alineadas. */}
-            <div className="reveal grid gap-8 rounded-panel border border-line bg-white p-5 shadow-card sm:p-8 lg:grid-cols-2 lg:gap-10 lg:p-10">
+            <div className="reveal surface-panel grid gap-8 p-5 sm:p-8 lg:grid-cols-2 lg:gap-10 lg:p-10">
               <div className="flex flex-col">
                 <Eyebrow>{t.siteName}</Eyebrow>
                 <h2 className="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
@@ -172,15 +172,18 @@ export async function HomePage({ locale }: { locale: Locale }) {
         ---------------------------------------------------------------- */}
         <section className="pb-16 lg:pb-24">
           <Container>
-            <div className="reveal rounded-panel bg-surface px-5 py-12 sm:px-10 lg:px-12 lg:py-16">
-              <div className="flex flex-wrap items-end justify-between gap-6">
-                <div>
-                  <Eyebrow>{es ? "Vida parroquial" : "Parish life"}</Eyebrow>
-                  <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-                    {es ? "Explore la comunidad" : "Explore our community"}
-                  </h2>
-                </div>
-                <p className="max-w-md leading-7 text-muted">
+            <div className="reveal surface-panel px-5 py-12 sm:px-10 lg:px-12 lg:py-16">
+              {/* Encabezado centrado: repite la simetria de las tres
+                  tarjetas de abajo y la composicion de la portada. La
+                  descripcion es corta, asi que centrada se sigue leyendo
+                  bien; text-balance reparte las lineas de forma pareja. */}
+              <div className="text-center">
+                <BrandStripe className="mb-5 justify-center" />
+                <Eyebrow>{es ? "Vida parroquial" : "Parish life"}</Eyebrow>
+                <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+                  {es ? "Explore la comunidad" : "Explore our community"}
+                </h2>
+                <p className="mx-auto mt-4 max-w-md text-balance leading-7 text-muted">
                   {es
                     ? "Hay muchas maneras de acercarse, participar y mantenerse al tanto."
                     : "There are many ways to connect, take part, and stay informed."}
@@ -192,7 +195,7 @@ export async function HomePage({ locale }: { locale: Locale }) {
                   <li key={path}>
                     <Link
                       href={localizedPath(locale, path)}
-                      className="group flex h-full flex-col overflow-hidden rounded-card bg-white shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                      className="group surface-card surface-card--interactive flex h-full flex-col overflow-hidden"
                     >
                       <ImageSlot
                         src={image}
@@ -264,8 +267,8 @@ function InfoCard({
 }) {
   return (
     <article
-      className={`flex gap-5 rounded-card p-6 transition-colors sm:p-7 ${
-        highlighted ? "bg-brand-50" : "bg-surface hover:bg-brand-50/60"
+      className={`surface-inset flex gap-5 p-6 sm:p-7 ${
+        highlighted ? "surface-inset--strong" : ""
       }`}
     >
       <span

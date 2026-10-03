@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getMessages, localizedPath, type Locale } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
+import { ReadingOptions } from "@/components/ReadingOptions";
 import { Container } from "@/components/ui";
 
 /** Enlaces del menu. "Ubicación" va aparte, como boton destacado. */
@@ -60,7 +61,10 @@ export function Navbar({ locale }: { locale: Locale }) {
             priority
             className="h-11 w-11"
           />
-          <span className="flex flex-col leading-none">
+          {/* brand-wordmark: en celulares angostos se oculta y queda solo
+              el escudo, para que quepan los botones de la derecha (ver
+              globals.css). El enlace se sigue anunciando con aria-label. */}
+          <span className="brand-wordmark flex flex-col leading-none">
             <span className="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-brand-700">
               {locale === "es" ? "Parroquia" : "Parish"}
             </span>
@@ -77,7 +81,7 @@ export function Navbar({ locale }: { locale: Locale }) {
           aria-label={
             locale === "es" ? "Navegación principal" : "Main navigation"
           }
-          className="hidden items-center gap-1 xl:flex"
+          className="nav-desktop hidden items-center gap-1 xl:flex"
         >
           {items.map(([path, label]) => (
             <Link
@@ -95,60 +99,69 @@ export function Navbar({ locale }: { locale: Locale }) {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 xl:flex">
-          <LanguageSwitch locale={locale} />
-          <Link
-            href={localizedPath(locale, "/mapa")}
-            className="whitespace-nowrap rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-          >
-            {locale === "es" ? "Cómo llegar" : "Find us"}
-          </Link>
-        </div>
-
-        {/* Navegación móvil */}
-        <div className="flex items-center gap-2 xl:hidden">
-          <div className="hidden sm:block">
+        {/* Lado derecho. El boton "Aa" va una sola vez, fuera de los dos
+            grupos, para que su panel siga abierto si la barra cambia de
+            modo al agrandar el texto. Las clases nav-desktop / nav-compact
+            permiten que globals.css muestre el menu compacto en pantallas
+            anchas cuando el texto esta en "Muy grande" y la barra completa
+            ya no cabe. */}
+        <div className="flex items-center gap-2 xl:gap-3">
+          <ReadingOptions locale={locale} />
+          <div className="nav-desktop hidden items-center gap-3 xl:flex">
             <LanguageSwitch locale={locale} />
-          </div>
-          <button
-            type="button"
-            onClick={toggleMenu}
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface"
-          >
-            <span className="sr-only">
-              {open
-                ? locale === "es"
-                  ? "Cerrar menú"
-                  : "Close menu"
-                : locale === "es"
-                  ? "Abrir menú"
-                  : "Open menu"}
-            </span>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              className="h-5 w-5"
-              aria-hidden="true"
+            <Link
+              href={localizedPath(locale, "/mapa")}
+              className="whitespace-nowrap rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
             >
-              {open ? (
-                <>
-                  <path d="m6 6 12 12" />
-                  <path d="m18 6-12 12" />
-                </>
-              ) : (
-                <>
-                  <path d="M4 7h16" />
-                  <path d="M4 12h16" />
-                  <path d="M4 17h16" />
-                </>
-              )}
-            </svg>
-          </button>
+              {locale === "es" ? "Cómo llegar" : "Find us"}
+            </Link>
+          </div>
+
+          {/* Navegación móvil */}
+          <div className="nav-compact flex items-center gap-2 xl:hidden">
+            <div className="hidden sm:block">
+              <LanguageSwitch locale={locale} />
+            </div>
+            <button
+              type="button"
+              onClick={toggleMenu}
+              aria-expanded={open}
+              aria-controls="mobile-nav"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface"
+            >
+              <span className="sr-only">
+                {open
+                  ? locale === "es"
+                    ? "Cerrar menú"
+                    : "Close menu"
+                  : locale === "es"
+                    ? "Abrir menú"
+                    : "Open menu"}
+              </span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                {open ? (
+                  <>
+                    <path d="m6 6 12 12" />
+                    <path d="m18 6-12 12" />
+                  </>
+                ) : (
+                  <>
+                    <path d="M4 7h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 17h16" />
+                  </>
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
       </Container>
 
@@ -158,7 +171,7 @@ export function Navbar({ locale }: { locale: Locale }) {
           aria-label={
             locale === "es" ? "Navegación móvil" : "Mobile navigation"
           }
-          className="border-t border-line bg-white xl:hidden"
+          className="nav-compact-menu border-t border-line bg-white xl:hidden"
         >
           <Container className="flex flex-col gap-1 py-4">
             <div className="mb-2 flex items-center justify-between px-4 sm:hidden">

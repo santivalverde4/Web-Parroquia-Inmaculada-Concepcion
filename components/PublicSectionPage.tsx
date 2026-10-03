@@ -57,13 +57,13 @@ async function HistoriaSection({ locale }: { locale: Locale }) {
   return (
     <SectionLayout locale={locale} title={section.title} intro={t.historyIntro}>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-        <article className="rounded-panel border border-line bg-white p-7 shadow-card sm:p-10">
+        <article className="surface-panel p-7 sm:p-10">
           <p className="whitespace-pre-wrap text-lg leading-9 text-ink">
             {section.content}
           </p>
         </article>
 
-        <aside className="rounded-panel bg-surface p-7 sm:p-8">
+        <aside className="surface-panel p-7 sm:p-8">
           <Eyebrow>{t.gallery}</Eyebrow>
           {section.photos.length > 0 ? (
             <div className="mt-5 grid gap-5">
@@ -124,7 +124,7 @@ async function VideosSection({ locale }: { locale: Locale }) {
               href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.id)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex h-full flex-col overflow-hidden rounded-card border border-line bg-white shadow-card transition-shadow hover:shadow-lift"
+              className="group surface-card surface-card--interactive flex h-full flex-col overflow-hidden"
             >
               <ImageSlot
                 src={video.thumbnail}
@@ -184,7 +184,7 @@ async function NoticiasSection({ locale }: { locale: Locale }) {
       <ul className="grid gap-5 md:grid-cols-2">
         {posts.map((post) => (
           <li key={post.id}>
-            <article className="flex h-full flex-col rounded-card border border-line bg-white p-7 shadow-card">
+            <article className="surface-card flex h-full flex-col p-7">
               <time
                 className="text-sm font-semibold text-brand-600"
                 dateTime={post.createdAt}
@@ -240,7 +240,7 @@ async function ProyectosSection({ locale }: { locale: Locale }) {
       <ul className="grid gap-5 md:grid-cols-2">
         {projects.map((project) => (
           <li key={project.id}>
-            <article className="flex h-full flex-col overflow-hidden rounded-card border border-line bg-white shadow-card">
+            <article className="surface-card flex h-full flex-col overflow-hidden">
               <ImageSlot
                 src={project.imageUrl}
                 ratio="aspect-video"
@@ -283,7 +283,7 @@ async function MapaSection({ locale }: { locale: Locale }) {
 
   return (
     <SectionLayout locale={locale} title={t.map} intro={t.mapIntro}>
-      <div className="grid overflow-hidden rounded-panel border border-line bg-white shadow-card lg:grid-cols-[1.25fr_0.75fr]">
+      <div className="surface-panel grid overflow-hidden lg:grid-cols-[1.25fr_0.75fr]">
         <ImageSlot
           src={showStaticMap ? "/api/map" : null}
           alt={t.map}

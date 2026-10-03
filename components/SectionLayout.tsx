@@ -16,9 +16,12 @@ export function SectionLayout({
 }) {
   return (
     <main id="main-content" className="w-full flex-1">
+      {/* Animacion de apertura: ver "Apertura de las paginas internas" en
+          globals.css. El panel se abre (section-open), sus hijos entran uno
+          tras otro (hero-enter) y la franja se dibuja (stripe-draw). */}
       <Container className="pt-3 sm:pt-5">
-        <div className="rounded-panel bg-surface px-6 py-14 sm:px-10 lg:px-12 lg:py-20">
-          <BrandStripe className="mb-5" />
+        <div className="section-open hero-enter surface-panel px-6 py-14 sm:px-10 lg:px-12 lg:py-20">
+          <BrandStripe className="stripe-draw mb-5" />
           <Eyebrow>
             {locale === "es"
               ? "Inmaculada Concepción"
@@ -35,7 +38,8 @@ export function SectionLayout({
         </div>
       </Container>
 
-      <Container className="py-12 lg:py-16">
+      {/* El contenido aparece cuando el encabezado ya casi termino. */}
+      <Container className="content-enter py-12 lg:py-16">
         <div className="reveal">{children}</div>
         <div className="mt-10">
           <BackLink

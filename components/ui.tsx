@@ -176,7 +176,7 @@ export function ImageSlot({
 /** Aviso que ocupa el lugar de una lista cuando todavia no hay contenido. */
 export function EmptyState({ text }: { text: string }) {
   return (
-    <div className="rounded-panel border border-line bg-surface px-8 py-16 text-center">
+    <div className="surface-panel px-8 py-16 text-center">
       <p className="mx-auto max-w-md leading-7 text-muted">{text}</p>
     </div>
   );
