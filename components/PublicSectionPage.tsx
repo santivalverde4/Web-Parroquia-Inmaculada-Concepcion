@@ -1,8 +1,9 @@
 import { PublicShell } from "@/components/PublicShell";
 import { SectionLayout } from "@/components/SectionLayout";
+import { HistoriaSection } from "@/components/HistoriaSection";
 import { ButtonLink, EmptyState, Eyebrow, ImageSlot } from "@/components/ui";
 import { getMessages, type Locale } from "@/lib/i18n";
-import { getSection, getProjects } from "@/lib/services/content";
+import { getProjects } from "@/lib/services/content";
 import { getYouTubeVideos } from "@/lib/services/youtube";
 import { getFacebookPosts } from "@/lib/services/facebook";
 import { getGoogleMapsLink } from "@/lib/services/maps";
@@ -43,53 +44,6 @@ export async function PublicSectionPage({
       {slug === "proyectos" && <ProyectosSection locale={locale} />}
       {slug === "mapa" && <MapaSection locale={locale} />}
     </PublicShell>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Historia                                                            */
-/* ------------------------------------------------------------------ */
-
-async function HistoriaSection({ locale }: { locale: Locale }) {
-  const t = getMessages(locale);
-  const section = await getSection("historia", locale);
-
-  return (
-    <SectionLayout locale={locale} title={section.title} intro={t.historyIntro}>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-        <article className="surface-panel p-7 sm:p-10">
-          <p className="whitespace-pre-wrap text-lg leading-9 text-ink">
-            {section.content}
-          </p>
-        </article>
-
-        <aside className="surface-panel p-7 sm:p-8">
-          <Eyebrow>{t.gallery}</Eyebrow>
-          {section.photos.length > 0 ? (
-            <div className="mt-5 grid gap-5">
-              {section.photos.map((photo) => (
-                <figure key={photo.id}>
-                  <ImageSlot
-                    src={photo.url}
-                    alt={photo.caption || ""}
-                    ratio="aspect-[3/2]"
-                    className="rounded-card"
-                    sizes="(max-width: 1024px) 100vw, 320px"
-                  />
-                  {photo.caption && (
-                    <figcaption className="mt-2.5 text-sm leading-6 text-muted">
-                      {photo.caption}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-4 leading-7 text-muted">{t.noPhotos}</p>
-          )}
-        </aside>
-      </div>
-    </SectionLayout>
   );
 }
 

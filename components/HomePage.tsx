@@ -1,8 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { getMessages, localizedPath, type Locale } from "@/lib/i18n";
 import { getSection } from "@/lib/services/content";
+import {
+  formatTime,
+  massSchedule,
+  officeHours,
+  parishServices,
+} from "@/lib/parishInfo";
 import { PublicShell } from "@/components/PublicShell";
 import {
   BrandStripe,
@@ -11,6 +17,15 @@ import {
   Eyebrow,
   ImageSlot,
 } from "@/components/ui";
+
+/** Columnas que ocupa un dia en la grilla de horarios: una cada dos misas. */
+function columnsFor(times: readonly string[]) {
+  return Math.max(1, Math.ceil(times.length / 2));
+}
+const scheduleColumns = massSchedule.reduce(
+  (total, { times }) => total + columnsFor(times),
+  0,
+);
 
 /** Secciones que se destacan desde la portada. */
 const destinations = [
@@ -108,25 +123,27 @@ export async function HomePage({ locale }: { locale: Locale }) {
         </section>
 
         {/* ---------------------------------------------------------------
-            Presentacion: el texto editable desde administracion, con los
-            datos practicos en tarjetas al costado.
+            Informacion general: un solo panel en tres bandas.
+            1. Presentacion junto a la foto. La foto se muestra en su
+               proporcion real (1400x761) para no recortarla ni ampliarla.
+            2. Horarios de misa a todo el ancho: un bloque igual por dia
+               con las horas apiladas, asi todos los dias se leen igual
+               aunque el domingo tenga mas misas.
+            3. Servicios y ubicacion, uno al lado del otro.
         ---------------------------------------------------------------- */}
         <section className="py-16 lg:py-24">
           <Container>
-            {/* Un solo panel con dos columnas. La grilla estira ambas
-                columnas a la misma altura; a la izquierda la foto ocupa el
-                espacio sobrante (flex-1) y a la derecha las tres tarjetas se
-                reparten el alto en partes iguales (grid-rows-3). Por eso
-                las dos columnas empiezan y terminan alineadas. */}
-            <div className="reveal surface-panel grid gap-8 p-5 sm:p-8 lg:grid-cols-2 lg:gap-10 lg:p-10">
-              <div className="flex flex-col">
-                <Eyebrow>{t.siteName}</Eyebrow>
-                <h2 className="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
-                  {info.title}
-                </h2>
-                <p className="mt-5 whitespace-pre-wrap text-base leading-8 text-muted">
-                  {info.content}
-                </p>
+            <div className="reveal surface-panel p-5 sm:p-8 lg:p-10">
+              <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
+                <div>
+                  <Eyebrow>{t.siteName}</Eyebrow>
+                  <h2 className="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
+                    {info.title}
+                  </h2>
+                  <p className="mt-5 whitespace-pre-wrap text-base leading-8 text-muted">
+                    {info.content}
+                  </p>
+                </div>
                 <ImageSlot
                   src="/images/interior-1.jpg"
                   alt={
@@ -134,33 +151,105 @@ export async function HomePage({ locale }: { locale: Locale }) {
                       ? "Interior del templo durante una celebración con coro y banda"
                       : "Inside the church during a celebration with choir and band"
                   }
-                  ratio="aspect-[16/10] lg:aspect-auto"
-                  className="mt-8 rounded-card lg:min-h-56 lg:flex-1"
-                  sizes="(max-width: 1024px) 100vw, 560px"
+                  ratio="aspect-[1400/761]"
+                  className="rounded-card"
+                  sizes="(max-width: 1024px) 100vw, 640px"
                 />
               </div>
 
-              <div className="grid gap-4 lg:grid-rows-3">
-                <InfoCard
+              {/* Horarios de misa. Cada dia ocupa una columna por cada dos
+                  misas (ver scheduleColumns): asi todos los bloques tienen
+                  dos filas de horas y la misma altura, y el domingo, con
+                  cuatro misas, simplemente es el doble de ancho. */}
+              <div className="surface-inset surface-inset--strong mt-8 p-6 sm:p-7 lg:mt-10">
+                <CardHeading
                   icon="clock"
                   title={t.mass}
                   text={t.massText}
                   highlighted
                 />
-                <InfoCard
-                  icon="heart"
-                  title={t.services}
-                  text={t.servicesText}
-                />
-                <InfoCard icon="pin" title={t.map} text={t.mapIntro}>
-                  <Link
-                    href={localizedPath(locale, "/mapa")}
-                    className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-700"
-                  >
-                    {es ? "Ver ubicación" : "See location"}
-                    <span aria-hidden="true">&rarr;</span>
-                  </Link>
-                </InfoCard>
+                <ul
+                  className="mt-6 grid gap-3 lg:[grid-template-columns:var(--schedule-cols)]"
+                  style={
+                    {
+                      "--schedule-cols": `repeat(${scheduleColumns}, minmax(0, 1fr))`,
+                    } as CSSProperties
+                  }
+                >
+                  {massSchedule.map(({ day, times }) => (
+                    <li
+                      key={day.es}
+                      className="rounded-xl border border-brand-100 bg-white/85 p-4 sm:p-5 lg:[grid-column:span_var(--day-span)]"
+                      style={
+                        { "--day-span": columnsFor(times) } as CSSProperties
+                      }
+                    >
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-700">
+                        {day[locale]}
+                      </p>
+                      {/* En celular y tablet las horas van en fila. Desde lg forman
+                          una grilla de dos filas que se llena por columnas. */}
+                      <ul
+                        className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 lg:grid lg:grid-flow-col lg:grid-rows-2 lg:gap-x-8"
+                        style={{
+                          gridTemplateColumns: `repeat(${columnsFor(times)}, max-content)`,
+                        }}
+                      >
+                        {times.map((time) => {
+                          const { clock, period } = formatTime(time, locale);
+                          return (
+                            <li
+                              key={time}
+                              className="whitespace-nowrap font-display text-xl font-bold tabular-nums text-ink"
+                            >
+                              {clock}
+                              <span className="ml-1 text-sm font-semibold text-muted">
+                                {period}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Servicios y ubicacion */}
+              <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+                <div className="surface-inset p-6 sm:p-7">
+                  <CardHeading
+                    icon="heart"
+                    title={t.services}
+                    text={t.servicesText}
+                  />
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {parishServices.map((service) => (
+                      <li
+                        key={service.es}
+                        className="rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-medium text-ink"
+                      >
+                        {service[locale]}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-5 border-t border-line pt-4 text-sm leading-6 text-muted">
+                    {officeHours[locale]}
+                  </p>
+                </div>
+
+                <div className="surface-inset flex flex-col p-6 sm:p-7">
+                  <CardHeading icon="pin" title={t.map} text={t.mapIntro} />
+                  <div className="mt-6 lg:mt-auto">
+                    <ButtonLink
+                      href={localizedPath(locale, "/mapa")}
+                      variant="secondary"
+                    >
+                      {es ? "Ver ubicación" : "See location"}
+                      <span aria-hidden="true">&rarr;</span>
+                    </ButtonLink>
+                  </div>
+                </div>
               </div>
             </div>
           </Container>
@@ -251,26 +340,20 @@ const infoIcons = {
   ),
 } as const;
 
-/** Tarjeta de dato practico dentro del panel de informacion general. */
-function InfoCard({
+/** Encabezado de un bloque de informacion: icono, titulo y una linea. */
+function CardHeading({
   icon,
   title,
   text,
   highlighted = false,
-  children,
 }: {
   icon: keyof typeof infoIcons;
   title: string;
   text: string;
   highlighted?: boolean;
-  children?: ReactNode;
 }) {
   return (
-    <article
-      className={`surface-inset flex gap-5 p-6 sm:p-7 ${
-        highlighted ? "surface-inset--strong" : ""
-      }`}
-    >
+    <div className="flex items-start gap-4">
       <span
         className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${
           highlighted ? "bg-gold-400 text-ink" : "bg-white text-brand-600"
@@ -289,11 +372,10 @@ function InfoCard({
           {infoIcons[icon]}
         </svg>
       </span>
-      <div className="flex flex-col justify-center">
+      <div>
         <h3 className="font-display text-xl font-bold text-ink">{title}</h3>
-        <p className="mt-1.5 leading-7 text-muted">{text}</p>
-        {children}
+        <p className="mt-1 leading-7 text-muted">{text}</p>
       </div>
-    </article>
+    </div>
   );
 }
