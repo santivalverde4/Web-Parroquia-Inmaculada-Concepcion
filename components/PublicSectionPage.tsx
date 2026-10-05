@@ -1,10 +1,10 @@
 import { PublicShell } from "@/components/PublicShell";
 import { SectionLayout } from "@/components/SectionLayout";
 import { HistoriaSection } from "@/components/HistoriaSection";
+import { VideosSection } from "@/components/VideosSection";
 import { ButtonLink, EmptyState, Eyebrow, ImageSlot } from "@/components/ui";
 import { getMessages, type Locale } from "@/lib/i18n";
 import { getProjects } from "@/lib/services/content";
-import { getYouTubeVideos } from "@/lib/services/youtube";
 import { getFacebookPosts } from "@/lib/services/facebook";
 import { getGoogleMapsLink } from "@/lib/services/maps";
 import { env } from "@/lib/env";
@@ -44,64 +44,6 @@ export async function PublicSectionPage({
       {slug === "proyectos" && <ProyectosSection locale={locale} />}
       {slug === "mapa" && <MapaSection locale={locale} />}
     </PublicShell>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Videos                                                              */
-/* ------------------------------------------------------------------ */
-
-async function VideosSection({ locale }: { locale: Locale }) {
-  const t = getMessages(locale);
-  const videos = (await getYouTubeVideos()).filter((video) => video.id);
-
-  if (videos.length === 0) {
-    return (
-      <SectionLayout locale={locale} title={t.videos} intro={t.videosIntro}>
-        <EmptyState
-          text={
-            locale === "es"
-              ? "Los videos aparecerán aquí cuando se configure el canal de la parroquia."
-              : "Videos will appear here when the parish channel is connected."
-          }
-        />
-      </SectionLayout>
-    );
-  }
-
-  return (
-    <SectionLayout locale={locale} title={t.videos} intro={t.videosIntro}>
-      <ul className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {videos.map((video) => (
-          <li key={video.id}>
-            <a
-              href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.id)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group surface-card surface-card--interactive flex h-full flex-col overflow-hidden"
-            >
-              <ImageSlot
-                src={video.thumbnail}
-                ratio="aspect-video"
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-              <div className="flex flex-1 flex-col p-6">
-                <h2 className="font-display text-lg font-bold leading-snug text-ink">
-                  {video.title}
-                </h2>
-                <p className="mt-2 line-clamp-3 text-sm leading-7 text-muted">
-                  {video.description}
-                </p>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 group-hover:text-brand-700">
-                  {locale === "es" ? "Ver en YouTube" : "Watch on YouTube"}
-                  <span aria-hidden="true">&rarr;</span>
-                </span>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </SectionLayout>
   );
 }
 
