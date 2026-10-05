@@ -9,8 +9,8 @@ async function main() {
   const password = process.env.SEED_ADMIN_PASSWORD;
   const name = process.env.SEED_ADMIN_NAME?.trim() || "Administrador";
 
-  if (!connectionString || !email || !password || password.length < 12) {
-    throw new Error("Set DATABASE_URL (or DIRECT_URL), SEED_ADMIN_EMAIL, and a SEED_ADMIN_PASSWORD of at least 12 characters before seeding.");
+  if (!connectionString || !email || !password || password.length < 8) {
+    throw new Error("Set DATABASE_URL (or DIRECT_URL), SEED_ADMIN_EMAIL, and a SEED_ADMIN_PASSWORD of at least 8 characters before seeding.");
   }
 
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
