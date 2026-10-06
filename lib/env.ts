@@ -14,7 +14,6 @@ export const env = {
   facebookAccessToken: optional("FACEBOOK_ACCESS_TOKEN"),
   facebookPageId: optional("FACEBOOK_PAGE_ID"),
   googleMapsApiKey: optional("GOOGLE_MAPS_API_KEY"),
-  parishMapQuery: optional("PARISH_MAP_QUERY"),
 } as const;
 
 export const hasDatabase = Boolean(env.databaseUrl);

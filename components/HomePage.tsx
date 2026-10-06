@@ -3,12 +3,8 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { getMessages, localizedPath, type Locale } from "@/lib/i18n";
 import { getSection } from "@/lib/services/content";
-import {
-  formatTime,
-  massSchedule,
-  officeHours,
-  parishServices,
-} from "@/lib/parishInfo";
+import { formatTime } from "@/lib/parishInfo";
+import { getParishSettings } from "@/lib/services/settings";
 import { PublicShell } from "@/components/PublicShell";
 import {
   BrandStripe,
@@ -22,10 +18,6 @@ import {
 function columnsFor(times: readonly string[]) {
   return Math.max(1, Math.ceil(times.length / 2));
 }
-const scheduleColumns = massSchedule.reduce(
-  (total, { times }) => total + columnsFor(times),
-  0,
-);
 
 /** Secciones que se destacan desde la portada. */
 const destinations = [
@@ -54,7 +46,18 @@ const destinations = [
 
 export async function HomePage({ locale }: { locale: Locale }) {
   const t = getMessages(locale);
-  const info = await getSection("info-general", locale);
+  const [info, settings] = await Promise.all([
+    getSection("info-general", locale),
+    getParishSettings(),
+  ]);
+  const { massSchedule, services, officeHours } = settings;
+  const scheduleColumns = massSchedule.reduce(
+    (total, { times }) => total + columnsFor(times),
+    0,
+  );
+  // Con muchos dias o muchas misas la grilla de columnas quedaria muy
+  // angosta: en ese caso cada dia ocupa un bloque de una grilla de 3.
+  const wideSchedule = scheduleColumns <= 4;
   const es = locale === "es";
 
   return (
@@ -168,18 +171,33 @@ export async function HomePage({ locale }: { locale: Locale }) {
                   text={t.massText}
                   highlighted
                 />
+                {massSchedule.length === 0 && (
+                  <p className="mt-6 rounded-xl border border-brand-100 bg-white/85 p-5 leading-7 text-muted">
+                    {es
+                      ? "Los horarios se publicarán pronto. Consulte con la oficina parroquial."
+                      : "The schedule will be published soon. Please contact the parish office."}
+                  </p>
+                )}
                 <ul
-                  className="mt-6 grid gap-3 lg:[grid-template-columns:var(--schedule-cols)]"
+                  className={`mt-6 grid gap-3 ${
+                    wideSchedule
+                      ? "lg:[grid-template-columns:var(--schedule-cols)]"
+                      : "sm:grid-cols-2 lg:grid-cols-3"
+                  }`}
                   style={
                     {
                       "--schedule-cols": `repeat(${scheduleColumns}, minmax(0, 1fr))`,
                     } as CSSProperties
                   }
                 >
-                  {massSchedule.map(({ day, times }) => (
+                  {massSchedule.map(({ day, times }, index) => (
                     <li
-                      key={day.es}
-                      className="rounded-xl border border-brand-100 bg-white/85 p-4 sm:p-5 lg:[grid-column:span_var(--day-span)]"
+                      key={`${index}-${day.es}`}
+                      className={`rounded-xl border border-brand-100 bg-white/85 p-4 sm:p-5 ${
+                        wideSchedule
+                          ? "lg:[grid-column:span_var(--day-span)]"
+                          : ""
+                      }`}
                       style={
                         { "--day-span": columnsFor(times) } as CSSProperties
                       }
@@ -190,7 +208,11 @@ export async function HomePage({ locale }: { locale: Locale }) {
                       {/* En celular y tablet las horas van en fila. Desde lg forman
                           una grilla de dos filas que se llena por columnas. */}
                       <ul
-                        className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 lg:grid lg:grid-flow-col lg:grid-rows-2 lg:gap-x-8"
+                        className={`mt-3 flex flex-wrap gap-x-5 gap-y-1.5 ${
+                          wideSchedule
+                            ? "lg:grid lg:grid-flow-col lg:grid-rows-2 lg:gap-x-8"
+                            : ""
+                        }`}
                         style={{
                           gridTemplateColumns: `repeat(${columnsFor(times)}, max-content)`,
                         }}
@@ -224,18 +246,20 @@ export async function HomePage({ locale }: { locale: Locale }) {
                     text={t.servicesText}
                   />
                   <ul className="mt-5 flex flex-wrap gap-2">
-                    {parishServices.map((service) => (
+                    {services.map((service, index) => (
                       <li
-                        key={service.es}
+                        key={`${index}-${service.es}`}
                         className="rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-medium text-ink"
                       >
                         {service[locale]}
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-5 border-t border-line pt-4 text-sm leading-6 text-muted">
-                    {officeHours[locale]}
-                  </p>
+                  {officeHours[locale] && (
+                    <p className="mt-5 border-t border-line pt-4 text-sm leading-6 text-muted">
+                      {officeHours[locale]}
+                    </p>
+                  )}
                 </div>
 
                 <div className="surface-inset flex flex-col p-6 sm:p-7">

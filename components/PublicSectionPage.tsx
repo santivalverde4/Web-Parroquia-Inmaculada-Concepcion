@@ -1,13 +1,10 @@
 import { PublicShell } from "@/components/PublicShell";
-import { SectionLayout } from "@/components/SectionLayout";
 import { HistoriaSection } from "@/components/HistoriaSection";
 import { VideosSection } from "@/components/VideosSection";
-import { ButtonLink, EmptyState, Eyebrow, ImageSlot } from "@/components/ui";
-import { getMessages, type Locale } from "@/lib/i18n";
-import { getProjects } from "@/lib/services/content";
-import { getFacebookPosts } from "@/lib/services/facebook";
-import { getGoogleMapsLink } from "@/lib/services/maps";
-import { env } from "@/lib/env";
+import { NoticiasSection } from "@/components/NoticiasSection";
+import { ProyectosSection } from "@/components/ProyectosSection";
+import { MapaSection } from "@/components/MapaSection";
+import type { Locale } from "@/lib/i18n";
 
 export const sectionSlugs = [
   "historia",
@@ -26,8 +23,8 @@ export function isSectionSlug(value: string): value is SectionSlug {
 /**
  * Renderiza cualquiera de las cinco paginas internas.
  *
- * Cada seccion vive en su propio componente mas abajo; este archivo solo
- * decide cual mostrar.
+ * Cada seccion vive en su propio componente (components/*Section.tsx);
+ * este archivo solo decide cual mostrar.
  */
 export async function PublicSectionPage({
   locale,
@@ -44,170 +41,5 @@ export async function PublicSectionPage({
       {slug === "proyectos" && <ProyectosSection locale={locale} />}
       {slug === "mapa" && <MapaSection locale={locale} />}
     </PublicShell>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Noticias                                                            */
-/* ------------------------------------------------------------------ */
-
-async function NoticiasSection({ locale }: { locale: Locale }) {
-  const t = getMessages(locale);
-  const posts = (await getFacebookPosts()).filter(
-    (post) => post.id !== "sample",
-  );
-  const dateFormat = new Intl.DateTimeFormat(
-    locale === "es" ? "es-CR" : "en-US",
-    { dateStyle: "long" },
-  );
-
-  if (posts.length === 0) {
-    return (
-      <SectionLayout locale={locale} title={t.news} intro={t.newsIntro}>
-        <EmptyState
-          text={
-            locale === "es"
-              ? "Pronto compartiremos noticias y actividades de la parroquia."
-              : "We will share parish news and events here soon."
-          }
-        />
-      </SectionLayout>
-    );
-  }
-
-  return (
-    <SectionLayout locale={locale} title={t.news} intro={t.newsIntro}>
-      <ul className="grid gap-5 md:grid-cols-2">
-        {posts.map((post) => (
-          <li key={post.id}>
-            <article className="surface-card flex h-full flex-col p-7">
-              <time
-                className="text-sm font-semibold text-brand-600"
-                dateTime={post.createdAt}
-              >
-                {dateFormat.format(new Date(post.createdAt))}
-              </time>
-              <p className="mt-3.5 whitespace-pre-wrap leading-8 text-ink">
-                {post.message}
-              </p>
-              {post.url && (
-                <a
-                  href={post.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-brand-700"
-                >
-                  {locale === "es" ? "Ver publicación" : "View post"}
-                  <span aria-hidden="true">&rarr;</span>
-                </a>
-              )}
-            </article>
-          </li>
-        ))}
-      </ul>
-    </SectionLayout>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Proyectos                                                           */
-/* ------------------------------------------------------------------ */
-
-async function ProyectosSection({ locale }: { locale: Locale }) {
-  const t = getMessages(locale);
-  const projects = await getProjects(locale);
-
-  if (projects.length === 0) {
-    return (
-      <SectionLayout locale={locale} title={t.projects} intro={t.projectsIntro}>
-        <EmptyState
-          text={
-            locale === "es"
-              ? "Pronto compartiremos los proyectos de nuestra comunidad."
-              : "We will share our community projects here soon."
-          }
-        />
-      </SectionLayout>
-    );
-  }
-
-  return (
-    <SectionLayout locale={locale} title={t.projects} intro={t.projectsIntro}>
-      <ul className="grid gap-5 md:grid-cols-2">
-        {projects.map((project) => (
-          <li key={project.id}>
-            <article className="surface-card flex h-full flex-col overflow-hidden">
-              <ImageSlot
-                src={project.imageUrl}
-                ratio="aspect-video"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <div className="flex flex-1 flex-col p-7">
-                <span
-                  className={`self-start rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
-                    project.status === "ACTUAL"
-                      ? "bg-brand-50 text-brand-700"
-                      : "bg-gold-100 text-gold-700"
-                  }`}
-                >
-                  {project.status === "ACTUAL" ? t.current : t.future}
-                </span>
-                <h2 className="mt-4 font-display text-2xl font-bold text-ink">
-                  {project.title}
-                </h2>
-                <p className="mt-3 whitespace-pre-wrap leading-8 text-muted">
-                  {project.description}
-                </p>
-              </div>
-            </article>
-          </li>
-        ))}
-      </ul>
-    </SectionLayout>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Mapa                                                                */
-/* ------------------------------------------------------------------ */
-
-async function MapaSection({ locale }: { locale: Locale }) {
-  const t = getMessages(locale);
-  const hasLocation = Boolean(env.parishMapQuery);
-  const showStaticMap = hasLocation && Boolean(env.googleMapsApiKey);
-  const mapLink = getGoogleMapsLink();
-
-  return (
-    <SectionLayout locale={locale} title={t.map} intro={t.mapIntro}>
-      <div className="surface-panel grid overflow-hidden lg:grid-cols-[1.25fr_0.75fr]">
-        <ImageSlot
-          src={showStaticMap ? "/api/map" : null}
-          alt={t.map}
-          ratio="aspect-[4/3] lg:aspect-auto lg:h-full lg:min-h-[420px]"
-          sizes="(max-width: 1024px) 100vw, 60vw"
-        />
-
-        <div className="flex flex-col justify-center p-8 sm:p-10">
-          <Eyebrow>
-            {locale === "es" ? "Planee su visita" : "Plan your visit"}
-          </Eyebrow>
-          <h2 className="mt-3 font-display text-2xl font-bold text-ink sm:text-3xl">
-            {t.siteName}
-          </h2>
-          <p className="mt-4 leading-8 text-muted">
-            {hasLocation
-              ? env.parishMapQuery
-              : locale === "es"
-                ? "La dirección y el mapa se confirmarán con la oficina parroquial."
-                : "Please confirm the address and map with the parish office."}
-          </p>
-          {mapLink && (
-            <ButtonLink href={mapLink} external className="mt-7 self-start">
-              {t.viewOnMaps}
-            </ButtonLink>
-          )}
-        </div>
-      </div>
-    </SectionLayout>
   );
 }

@@ -2,6 +2,7 @@ import Image from "next/image";
 import { SectionLayout } from "@/components/SectionLayout";
 import { BrandStripe, Eyebrow } from "@/components/ui";
 import { getMessages, type Locale } from "@/lib/i18n";
+import { getStoredSection } from "@/lib/services/content";
 import {
   artPhoto,
   coverPhoto,
@@ -24,16 +25,38 @@ import {
  * Todas las fotos se muestran en su proporcion real (width/height del
  * archivo), sin recortes: asi nunca se amplian mas de la cuenta.
  */
-export function HistoriaSection({ locale }: { locale: Locale }) {
+export async function HistoriaSection({ locale }: { locale: Locale }) {
   const t = getMessages(locale);
   const es = locale === "es";
 
+  // Lo editado en el panel tiene prioridad sobre el texto de lib/history.ts.
+  // Si la version en ingles no se completo, se muestra la espanola (la misma
+  // regla que el resto del sitio).
+  const stored = await getStoredSection("historia");
+  const custom = es ? stored.es : (stored.en ?? stored.es);
+  const title = custom?.title || historyTitle[locale];
+  const story = custom
+    ? splitParagraphs(custom.content)
+    : historyStory.map((paragraph) => paragraph[locale]);
+  // Las fotos agregadas desde el panel van primero en la galeria.
+  const photos: HistoryPhoto[] = [
+    ...stored.photos.map((photo) => ({
+      src: photo.url,
+      width: 1600,
+      height: 1200,
+      alt: {
+        es: photo.caption || "Fotografía de la parroquia",
+        en: photo.caption || "Parish photo",
+      },
+      caption: photo.caption
+        ? { es: photo.caption, en: photo.caption }
+        : undefined,
+    })),
+    ...galleryPhotos,
+  ];
+
   return (
-    <SectionLayout
-      locale={locale}
-      title={historyTitle[locale]}
-      intro={t.historyIntro}
-    >
+    <SectionLayout locale={locale} title={title} intro={t.historyIntro}>
       <div className="space-y-6 lg:space-y-8">
         {/* 1. Relato ------------------------------------------------- */}
         <section className="surface-panel p-5 sm:p-8 lg:p-10">
@@ -46,8 +69,8 @@ export function HistoriaSection({ locale }: { locale: Locale }) {
                   : "From a La Unión neighborhood to a parish community"}
               </h2>
               <div className="mt-6 space-y-5 text-base leading-8 text-muted">
-                {historyStory.map((paragraph) => (
-                  <p key={paragraph.es}>{paragraph[locale]}</p>
+                {story.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
                 ))}
               </div>
             </div>
@@ -174,8 +197,11 @@ export function HistoriaSection({ locale }: { locale: Locale }) {
           {/* Columnas tipo mosaico: cada foto conserva su proporcion y las
               verticales conviven con las horizontales sin recortarse. */}
           <ul className="mt-8 columns-1 gap-5 sm:columns-2 lg:columns-3">
-            {galleryPhotos.map((photo) => (
-              <li key={photo.src} className="mb-5 break-inside-avoid">
+            {photos.map((photo, index) => (
+              <li
+                key={`${index}-${photo.src}`}
+                className="mb-5 break-inside-avoid"
+              >
                 <figure>
                   <Photo
                     photo={photo}
@@ -197,7 +223,21 @@ export function HistoriaSection({ locale }: { locale: Locale }) {
   );
 }
 
-/** Foto en su proporcion real, con las esquinas de las tarjetas. */
+/** Separa un texto en parrafos usando las lineas en blanco. */
+function splitParagraphs(text: string) {
+  return text
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Foto en su proporcion real, con las esquinas de las tarjetas.
+ *
+ * Las fotos agregadas desde el panel son enlaces externos: se muestran sin
+ * pasar por el optimizador de Next (que solo acepta dominios configurados)
+ * y con h-auto toman la proporcion real de la imagen al cargar.
+ */
 function Photo({
   photo,
   locale,
@@ -217,6 +257,7 @@ function Photo({
       height={photo.height}
       sizes={sizes}
       priority={priority}
+      unoptimized={/^https?:\/\//.test(photo.src)}
       className="h-auto w-full rounded-card bg-surface"
     />
   );

@@ -69,3 +69,12 @@ model Photo {
   sectionId String
   section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 }
+
+/// Datos editables del sitio que no son una seccion de texto: horarios de
+/// misa, servicios, horario de oficina y contacto. Cada fila guarda un JSON
+/// (ver lib/parishInfo.ts para la forma de cada valor).
+model SiteSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
