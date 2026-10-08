@@ -28,8 +28,14 @@ export const settingKeys = {
  */
 export const getParishSettings = cache(async (): Promise<ParishSettings> => {
   if (!hasDatabase) return defaultParishSettings;
+  // During development, Turbopack can retain a Prisma client generated before
+  // this model existed. Keep the public site available until the dev server is
+  // restarted and the regenerated client is loaded.
+  const siteSetting = prisma.siteSetting;
+  if (!siteSetting) return defaultParishSettings;
+
   try {
-    const rows = await prisma.siteSetting.findMany({
+    const rows = await siteSetting.findMany({
       where: { key: { in: Object.values(settingKeys) } },
     });
     const saved = new Map(rows.map((row) => [row.key, row.value]));
@@ -55,7 +61,14 @@ export async function saveSetting(
   key: (typeof settingKeys)[keyof typeof settingKeys],
   value: Prisma.InputJsonValue,
 ) {
-  await prisma.siteSetting.upsert({
+  const siteSetting = prisma.siteSetting;
+  if (!siteSetting) {
+    throw new Error(
+      "El cliente Prisma está desactualizado. Reinicia el servidor de desarrollo.",
+    );
+  }
+
+  await siteSetting.upsert({
     where: { key },
     create: { key, value },
     update: { value },
