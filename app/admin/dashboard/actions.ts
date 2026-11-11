@@ -310,5 +310,6 @@ export async function deleteProjectAction(formData: FormData) {
 
 export async function signOutAction() {
   await requireAdmin();
-  await signOut({ redirectTo: "/admin/login" });
+  await signOut({ redirect: false });
+  redirect("/admin/login");
 }

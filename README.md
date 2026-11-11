@@ -111,7 +111,6 @@ Abre `.env` con tu editor. **Pídele estos valores por mensaje privado al admini
 DATABASE_URL="..."
 DIRECT_URL="..."
 AUTH_SECRET="..."
-NEXTAUTH_URL="http://localhost:3000"
 YOUTUBE_API_KEY="..."
 YOUTUBE_CHANNEL_ID="..."
 ```
@@ -123,7 +122,6 @@ Las demás líneas déjalas como están.
 | `DATABASE_URL` | Dirección de la base de datos PostgreSQL que comparte el equipo. |
 | `DIRECT_URL` | La misma base de datos, pero con conexión directa (Prisma la usa para las migraciones). |
 | `AUTH_SECRET` | Clave secreta para firmar las sesiones del panel de administración. |
-| `NEXTAUTH_URL` | Dirección donde corre la página en tu computadora. En local es `http://localhost:3000`. |
 | `YOUTUBE_API_KEY` y `YOUTUBE_CHANNEL_ID` | Sirven para mostrar la lista de videos del canal en la página de Videos. |
 | `SEED_ADMIN_...` | Solo se usan para crear el primer administrador. **No los necesitas** si usas la base de datos del equipo. |
 | `FACEBOOK_...` y `GOOGLE_MAPS_API_KEY` | Opcionales. Pueden quedar vacíos (ver [Integraciones opcionales](#11-integraciones-opcionales)). |
@@ -131,6 +129,10 @@ Las demás líneas déjalas como están.
 > ⚠️ **Nunca subas el `.env` a git** ni lo compartas en chats públicos. Ya está en el `.gitignore` para que no se suba por accidente.
 >
 > ⚠️ **No corras `npm run db:seed` ni `npm run db:deploy`** si usas la base de datos del equipo. Ya está configurada, y el seed puede cambiar la contraseña del administrador.
+
+### Despliegue en Vercel
+
+En **Settings → Environment Variables**, configura `DATABASE_URL` y `AUTH_SECRET` para Production. No configures `NEXTAUTH_URL` con `http://localhost:3000`: Auth.js detecta automáticamente el dominio de Vercel. Si esa variable ya existe con ese valor, elimínala o cámbiala por la URL pública del sitio y vuelve a desplegar.
 
 ---
 
